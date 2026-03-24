@@ -37,6 +37,36 @@ object Streams extends App :
     def iterate[A](init: => A)(next: A => A): Stream[A] =
       cons(init, iterate(next(init))(next))
 
+    def takeWhile[A](stream: Stream[A])(pred: A => Boolean): Stream[A] = stream match
+      case Cons(head, tail) if pred(head()) => cons(head(), takeWhile(tail())(pred))
+      case _ => Empty()
+
+    def fill[A](n: Int)(element: => A): Stream[A] = n match
+      case 0 => Empty()
+      case _ => cons(element, fill(n - 1)(element))
+
+    def fibonacci(): Stream[Int] =
+      def _fib(n1: Int, n2: Int): Stream[Int] = (n1, n2) match
+        case (0, 1) => cons(0, cons(1, cons(1, _fib(n2, n1 + n2))))
+        case _ => cons(n1 + n2, _fib(n2, n1 + n2))
+      _fib(0, 1)
+
+    def fromList[A](s: Sequence[A]): Stream[A] = s match
+      case Sequence.Cons(h, t) => cons(h, fromList(t))
+      case Sequence.Nil() => Empty()
+
+    def interleave[A, B](s1: Stream[A], s2: Stream[B]): Stream[A | B] = (s1, s2) match
+      case (Cons(h1, t1), Cons(h2, t2)) => cons(h1(), interleave(s2, t1()))
+      case (Cons(h1, t1), Empty()) => s1.asInstanceOf[Stream[A | B]]
+      case (Empty(), Cons(h2, t2)) => s2.asInstanceOf[Stream[A | B]]
+      case _ => Empty()
+
+    def cycle[A](lst: Sequence[A]): Stream[A] =
+      def _cycle(dummy: Sequence[A]): Stream[A] = dummy match
+        case Sequence.Cons(h, t) => cons(h, _cycle(t))
+        case Sequence.Nil() => _cycle(lst)
+      _cycle(lst)
+
   end Stream
 
 @main def tryStreams =
