@@ -5,7 +5,7 @@ import u03.Sequences.Sequence.*
 
 import scala.annotation.tailrec
 
-object Task2:
+object Task2B:
   enum Person:
     case Student(name: String, year: Int)
     case Teacher(name: String, course: String)
